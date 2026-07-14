@@ -5,7 +5,11 @@ from scipy.interpolate import interp1d
 import numpy as np
 
 # 웹 페이지 기본 설정
-st.set_page_config(page_title="📊 DYE COMPATIBILITY GRAPH VIEWER", layout="centered")
+st.set_page_config(
+    page_title="📊 DYE COMPATIBILITY GRAPH VIEWER", 
+    page_icon="📊",  # <- 여기에 원하는 이모지를 직접 넣으시면 됩니다.
+    layout="centered"
+)
 
 st.title("📊 T/S 상용성 그래프 만들기")
 st.write("엑셀 데이터를 표에 바로 붙여넣거나 파일을 업로드하여 부드러운 상용성 그래프를 생성합니다.")
