@@ -6,7 +6,7 @@ import numpy as np
 
 # 웹 페이지 기본 설정
 st.set_page_config(
-    page_title="📊 DYE COMPATIBILITY GRAPH VIEWER", 
+    page_title="상용성그래프 만들기", 
     page_icon="📊",  # <- 여기에 원하는 이모지를 직접 넣으시면 됩니다.
     layout="centered"
 )
