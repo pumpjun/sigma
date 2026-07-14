@@ -4,6 +4,15 @@ import matplotlib.pyplot as plt
 from scipy.interpolate import interp1d
 import numpy as np
 
+
+hide_streamlit_style = """
+<style>
+#MainMenu {visibility: hidden;}
+footer {visibility: hidden;}
+</style>
+"""
+st.markdown(hide_streamlit_style, unsafe_allow_html=True)
+
 # 웹 페이지 기본 설정
 st.set_page_config(
     page_title="상용성그래프 만들기", 
