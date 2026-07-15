@@ -4,7 +4,6 @@ import matplotlib.pyplot as plt
 from scipy.interpolate import interp1d
 import numpy as np
 
-
 hide_streamlit_style = """
 <style>
 #MainMenu {visibility: hidden;}
@@ -16,7 +15,7 @@ st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 # 웹 페이지 기본 설정
 st.set_page_config(
     page_title="상용성그래프 만들기", 
-    page_icon="📊",  # <- 여기에 원하는 이모지를 직접 넣으시면 됩니다.
+    page_icon="📊",  
     layout="centered"
 )
 
@@ -56,9 +55,34 @@ dye_amount_1 = format_dye_amount(dye_amount_1_raw)
 dye_amount_2 = format_dye_amount(dye_amount_2_raw)
 dye_amount_3 = format_dye_amount(dye_amount_3_raw)
 
-label_1 = f"{dye_name_1} {dye_amount_1}".strip() if dye_name_1 else "Dye 1"
-label_2 = f"{dye_name_2} {dye_amount_2}".strip() if dye_name_2 else "Dye 2"
-label_3 = f"{dye_name_3} {dye_amount_3}".strip() if dye_name_3 else "Dye 3"
+# --- [수정 및 추가] 이름 길이를 맞춰서 줄맞춤하기 ---
+# 1. 입력된 염료명 중 가장 긴 길이를 찾습니다. (+3은 이름과 함량 사이의 여유 공백)
+name_lengths = [len(dye_name_1), len(dye_name_2), len(dye_name_3)]
+max_len = max(name_lengths) + 3 
+
+# 2. 지정된 길이(max_len)만큼 공간을 확보하고 왼쪽 정렬해주는 함수
+def align_label(name, amount, default_name):
+    if not name:
+        return default_name
+    return f"{name.ljust(max_len)}{amount}"
+
+label_1 = align_label(dye_name_1, dye_amount_1, "Dye 1")
+label_2 = align_label(dye_name_2, dye_amount_2, "Dye 2")
+label_3 = align_label(dye_name_3, dye_amount_3, "Dye 3")
+
+# --- [추가] 글자 길이에 따라 폰트 크기 자동 조절 ---
+# 가장 긴 라벨의 길이를 기준으로 폰트 크기(font_size)를 결정합니다.
+max_label_len = max(len(label_1), len(label_2), len(label_3))
+
+if max_label_len > 40:      # 글자가 아주 길 때
+    font_size = 10
+elif max_label_len > 30:    # 글자가 꽤 길 때
+    font_size = 12
+elif max_label_len > 22:    # 중간 크기
+    font_size = 14
+else:                       # 기본 크기
+    font_size = 17
+# ---------------------------------------------------
 
 
 # 2. 데이터 입력
@@ -157,8 +181,13 @@ if raw_data is not None:
             ax.set_ylabel('Exhaustion (%)', fontsize=12, labelpad=10)
             ax.grid(True, linestyle='--', alpha=0.7)
             
-            # 범례 생성 (글자 크기 15, 테두리 설정)
-            leg = ax.legend(fontsize=15, loc='lower right', framealpha=1.0, edgecolor='#CCCCCC')
+            # --- [수정] 범례 고정폭 폰트 및 자동 크기(font_size) 적용 ---
+            leg = ax.legend(
+                loc='lower right', 
+                framealpha=1.0, 
+                edgecolor='#CCCCCC',
+                prop={'family': 'monospace', 'size': font_size}
+            )
             
             # 범례 내의 텍스트 색상을 각 그래프 선 색상과 일치
             for i, text in enumerate(leg.get_texts()):
