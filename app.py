@@ -4,9 +4,19 @@ import matplotlib.pyplot as plt
 from scipy.interpolate import interp1d
 import numpy as np
 
-# 화면의 상하 여백을 확 줄여서 스크롤을 방지하는 CSS 추가
+# 맑은 고딕 폰트 및 마이너스 기호 깨짐 방지 전역 설정 (제목 및 주석 등에 적용)
+plt.rcParams['font.family'] = 'Malgun Gothic'
+plt.rcParams['axes.unicode_minus'] = False
+
+# 화면의 상하 여백을 확 줄여서 스크롤을 방지하고 Material Icon을 로드하는 CSS 추가
 hide_streamlit_style = """
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
 <style>
+/* Material Icon 자체 여백 및 수직 정렬 보정 */
+.material-symbols-outlined {
+    line-height: 1 !important;
+}
+
 #MainMenu {visibility: hidden;}
 footer {visibility: hidden;}
 .block-container {
@@ -15,7 +25,6 @@ footer {visibility: hidden;}
 }
 </style>
 """
-st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
 # 웹 페이지 기본 설정 (넓은 화면 'wide' 레이아웃 적용)
 st.set_page_config(
@@ -24,7 +33,13 @@ st.set_page_config(
     layout="wide"
 )
 
-st.title("📊 T/S 상용성 그래프 만들기")
+st.markdown(hide_streamlit_style, unsafe_allow_html=True)
+
+# 메인 타이틀 (수직 정렬 적용)
+st.markdown(
+    "<h1 style='display: flex; align-items: center; margin-top: 0;'><span class='material-symbols-outlined' style='font-size:36px; margin-right:12px;'>bar_chart</span>T/S 상용성 그래프 만들기</h1>", 
+    unsafe_allow_html=True
+)
 st.write("엑셀 데이터를 표에 바로 붙여넣어 부드러운 상용성 그래프를 생성합니다.")
 
 # 화면을 좌/우 두 개의 열로 나눔 (왼쪽 표에 조금 더 공간을 주어 가로 스크롤 방지, 비율 1.1 : 1)
@@ -32,7 +47,7 @@ col_left, col_right = st.columns([1.1, 1], gap="large")
 
 with col_left:
     # 1. 그래프 기본 정보 및 염료 정보 입력 섹션
-    st.subheader("📝 그래프 및 염료 정보 입력")
+    st.markdown("<h3 style='display: flex; align-items: center;'><span class='material-symbols-outlined' style='margin-right:8px;'>edit_document</span>그래프 및 염료 정보 입력</h3>", unsafe_allow_html=True)
 
     # 그래프 제목 입력 필드
     graph_title = st.text_input("Graph Title:", value="", placeholder="예: HP Combi.")
@@ -91,7 +106,7 @@ with col_left:
         font_size = 17
 
     # 2. 데이터 입력 (가로형 표, Point 1 숨김)
-    st.subheader("⚙️ 데이터 입력")
+    st.markdown("<h3 style='display: flex; align-items: center;'><span class='material-symbols-outlined' style='margin-right:8px;'>settings</span>데이터 입력</h3>", unsafe_allow_html=True)
 
     raw_data = None
 
@@ -135,9 +150,10 @@ with col_left:
     if not transposed_df.iloc[1:][['Dye 1', 'Dye 2', 'Dye 3']].dropna(how='all').empty:
         raw_data = transposed_df
 
+
 # 오른쪽 화면: 그래프 출력
 with col_right:
-    st.subheader("📈 그래프 결과")
+    st.markdown("<h3 style='display: flex; align-items: center;'><span class='material-symbols-outlined' style='margin-right:8px;'>show_chart</span>그래프 결과</h3>", unsafe_allow_html=True)
     
     # 데이터를 부드러운 곡선으로 보간하여 그려주는 함수
     def plot_smooth_segment(ax, x, y, color, label=None, linewidth=2.5):
@@ -189,7 +205,7 @@ with col_right:
                 plot_smooth_segment(ax, df2['X'].values, df2[df.columns[2]].values, color=color_red)
                 plot_smooth_segment(ax, df2['X'].values, df2[df.columns[3]].values, color=color_blue)
 
-                # 메인 타이틀 및 축 설정
+                # 메인 타이틀 설정 (맑은 고딕 적용됨)
                 title_text = graph_title if graph_title.strip() else "Dye Compatibility Graph"
                 ax.set_title(title_text, fontsize=20, fontweight='bold', pad=40)
                 
@@ -199,7 +215,7 @@ with col_right:
                 
                 ax.grid(True, linestyle='--', alpha=0.7)
                 
-                # 범례 고정폭 폰트 및 자동 크기(font_size) 적용
+                # 범례 폰트를 다시 고정폭(monospace)으로 변경하여 줄맞춤 복구
                 leg = ax.legend(
                     loc='lower right', 
                     framealpha=1.0, 
@@ -216,7 +232,7 @@ with col_right:
                 ax.set_ylim(0, 120)
                 ax.set_xlim(0, 120)
 
-                # Alkali Dosing 주석 배치
+                # Alkali Dosing 주석 배치 (맑은 고딕 적용됨)
                 ax.annotate(
                     'Alkali\nDosing', 
                     xy=(20, 120), 
@@ -230,10 +246,11 @@ with col_right:
                     annotation_clip=False
                 )
 
-                # 웹 화면 출력 (오른쪽 컨테이너의 너비에 맞게 조절)
-                st.pyplot(fig, use_container_width=True)
+                # 웹 화면 출력 및 고해상도 저장 처리
+                fig.savefig('temp_graph.png', dpi=300, bbox_inches='tight')
+                st.image('temp_graph.png')
 
         except Exception as e:
-            st.error(f"그래프를 생성하는 중 오류가 발생했습니다. 표에 문자가 섞여있는지 확인해 주세요. 오류: {e}")
+            st.error(f"그래프를 생성하는 중 오류가 발생했습니다. 표에 문자가 섞여있는지 확인해 주세요. 오류: {e}", icon=":material/error:")
     else:
-        st.write("👈 왼쪽 표에 데이터를 붙여넣으면 여기에 그래프가 표시됩니다.")
+        st.info("왼쪽 표에 데이터를 붙여넣으면 여기에 그래프가 표시됩니다.", icon=":material/arrow_back:")
