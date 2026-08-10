@@ -3,6 +3,9 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from scipy.interpolate import interp1d
 import numpy as np
+import io
+from openpyxl import Workbook
+from openpyxl.drawing.image import Image as xlImage
 
 # 맑은 고딕 폰트 및 마이너스 기호 깨짐 방지 전역 설정 (제목 및 주석 등에 적용)
 plt.rcParams['font.family'] = 'Malgun Gothic'
@@ -26,10 +29,9 @@ footer {visibility: hidden;}
 </style>
 """
 
-# 웹 페이지 기본 설정 (넓은 화면 'wide' 레이아웃 적용)
+# 웹 페이지 기본 설정 (이모티콘 탭 아이콘 제거)
 st.set_page_config(
     page_title="상용성그래프 만들기", 
-    page_icon="📊",  
     layout="wide"
 )
 
@@ -42,12 +44,22 @@ st.markdown(
 )
 st.write("엑셀 데이터를 표에 바로 붙여넣어 부드러운 상용성 그래프를 생성합니다.")
 
-# 화면을 좌/우 두 개의 열로 나눔 (왼쪽 표에 조금 더 공간을 주어 가로 스크롤 방지, 비율 1.1 : 1)
+# 화면을 좌/우 두 개의 열로 나눔 (비율 1.1 : 1)
 col_left, col_right = st.columns([1.1, 1], gap="large")
 
 with col_left:
     # 1. 그래프 기본 정보 및 염료 정보 입력 섹션
-    st.markdown("<h3 style='display: flex; align-items: center;'><span class='material-symbols-outlined' style='margin-right:8px;'>edit_document</span>그래프 및 염료 정보 입력</h3>", unsafe_allow_html=True)
+    # 제목과 다운로드 버튼을 나란히 배치하기 위해 열을 나눔
+    header_col, btn_col = st.columns([0.65, 0.35])
+    
+    with header_col:
+        st.markdown("<h3 style='display: flex; align-items: center; margin-top: 0;'><span class='material-symbols-outlined' style='margin-right:8px;'>edit_document</span>그래프 및 염료 정보 입력</h3>", unsafe_allow_html=True)
+    
+    with btn_col:
+        # 제목과 높이를 맞추기 위한 여백 추가
+        st.markdown("<div style='margin-top: 12px;'></div>", unsafe_allow_html=True)
+        # 나중에 엑셀이 생성된 뒤 버튼을 넣을 빈 공간(placeholder) 미리 생성
+        download_btn_placeholder = st.empty()
 
     # 그래프 제목 입력 필드
     graph_title = st.text_input("Graph Title:", value="", placeholder="예: HP Combi.")
@@ -90,7 +102,7 @@ with col_left:
         return f"{name.ljust(max_len)}{amount}"
 
     label_1 = align_label(dye_name_1, dye_amount_1, "Dye 1")
-    label_2 = align_label(dye_name_2, dye_amount_2, "Dye 2")
+    label_2 = align_label(dye_name_2, dye_amount_2, "Dye 3")
     label_3 = align_label(dye_name_3, dye_amount_3, "Dye 3")
 
     # 글자 길이에 따라 폰트 크기 자동 조절
@@ -151,7 +163,7 @@ with col_left:
         raw_data = transposed_df
 
 
-# 오른쪽 화면: 그래프 출력
+# 오른쪽 화면: 그래프 출력 및 엑셀 다운로드
 with col_right:
     st.markdown("<h3 style='display: flex; align-items: center;'><span class='material-symbols-outlined' style='margin-right:8px;'>show_chart</span>그래프 결과</h3>", unsafe_allow_html=True)
     
@@ -250,7 +262,58 @@ with col_right:
                 fig.savefig('temp_graph.png', dpi=300, bbox_inches='tight')
                 st.image('temp_graph.png')
 
+                # ==========================================
+                # 엑셀 파일 생성 및 다운로드 로직
+                # ==========================================
+                wb = Workbook()
+                ws = wb.active
+                ws.title = "Graph Data"
+
+                # 1. 엑셀에 그래프 기본 정보 및 염료 정보 쓰기
+                ws.append(["그래프 제목", title_text])
+                ws.append([])
+                ws.append(["염료 구분", "염료명", "함량 (% o.w.f)"])
+                ws.append(["Dye 1", dye_name_1, dye_amount_1_raw])
+                ws.append(["Dye 2", dye_name_2, dye_amount_2_raw])
+                ws.append(["Dye 3", dye_name_3, dye_amount_3_raw])
+                ws.append([])
+
+                # 2. 엑셀에 표 데이터 쓰기 (웹 화면에 보이는 가로형 그대로)
+                ws.append(["[입력된 데이터 (Time & Dyes)]"])
+                
+                # full_df의 인덱스(Time, Dye 1 등)를 첫 번째 열로, 나머지 데이터를 가로로 엑셀에 기록
+                for index, row in full_df.iterrows():
+                    ws.append([index] + row.tolist())
+
+                # 3. 엑셀에 생성된 그래프 이미지 삽입 
+                # 가로로 길어진 데이터 아래쪽(B15 근처)에 깔끔하게 배치합니다.
+                img_for_excel = xlImage('temp_graph.png')
+                img_for_excel.width = img_for_excel.width * 0.5   # 엑셀 내 이미지 크기를 절반(50%)으로 축소
+                img_for_excel.height = img_for_excel.height * 0.5
+                ws.add_image(img_for_excel, 'B15')
+
+                # 메모리 버퍼에 엑셀 저장
+                excel_buffer = io.BytesIO()
+                wb.save(excel_buffer)
+                excel_buffer.seek(0)
+                
+                # 파일명 생성 (제목이 없으면 기본 이름 설정)
+                download_filename = f"{graph_title if graph_title else 'Graph_Data'}.xlsx"
+
+                # 스트림릿 다운로드 버튼 생성 (이모지 제거, 구글 Material 아이콘 적용)
+                # 이 코드는 위에서 만든 왼쪽 제목 옆 빈 공간(placeholder)에 렌더링됩니다.
+                download_btn_placeholder.download_button(
+                    label="엑셀 파일 다운로드",
+                    data=excel_buffer,
+                    file_name=download_filename,
+                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    use_container_width=True,
+                    icon=":material/download:"
+                )
+
         except Exception as e:
+            # 에러 아이콘도 구글 Material 아이콘 적용
             st.error(f"그래프를 생성하는 중 오류가 발생했습니다. 표에 문자가 섞여있는지 확인해 주세요. 오류: {e}", icon=":material/error:")
     else:
+        # 안내 아이콘도 구글 Material 아이콘 적용
         st.info("왼쪽 표에 데이터를 붙여넣으면 여기에 그래프가 표시됩니다.", icon=":material/arrow_back:")
