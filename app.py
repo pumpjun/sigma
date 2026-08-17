@@ -20,45 +20,74 @@ st.set_page_config(
 )
 
 # ==========================================
-# 1. 로고 이미지를 Base64로 변환 (HTML 삽입용)
+# 1. 로고 이미지를 Base64로 인코딩 (표준 UI 적용)
 # ==========================================
-def get_image_base64(path):
-    if os.path.exists(path):
-        with open(path, "rb") as f:
-            return base64.b64encode(f.read()).decode()
-    return None
-
-logo_b64 = get_image_base64("logo.png")
-
-if logo_b64:
-    logo_html = f'<img src="data:image/png;base64,{logo_b64}" style="height: 45px; margin-right: 15px; border-radius: 4px;">'
-else:
-    logo_html = "<div style='height:45px; width:45px; background-color:#ccc; border-radius:8px; display:flex; align-items:center; justify-content:center; margin-right: 15px; color: #333; font-weight: bold; font-size: 14px;'>Logo</div>"
+try:
+    with open("logo.png", "rb") as image_file:
+        logo_base64 = base64.b64encode(image_file.read()).decode()
+except Exception:
+    logo_base64 = ""
 
 # ==========================================
-# 2. CSS 및 HTML 주입 (빈 줄 제거하여 화면 노출 방지)
+# 2. 고정 메뉴바 및 UI 커스텀 CSS 주입
 # ==========================================
-custom_css_and_header = f"""
+st.markdown(f"""
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
 <style>
-[data-testid="stHeader"] {{ display: none !important; }}
-#MainMenu {{ display: none !important; }}
-footer {{ display: none !important; }}
-.fixed-top-bar {{ position: fixed; top: 0; left: 0; width: 100%; height: 70px; background-color: #ffffff; z-index: 999999; display: flex; align-items: center; padding: 0 2rem; box-shadow: 0 2px 6px rgba(0,0,0,0.1); color: #31333F; }}
-@media (prefers-color-scheme: dark) {{ .fixed-top-bar {{ background-color: #0E1117; box-shadow: 0 2px 6px rgba(255,255,255,0.05); color: #FAFAFA; }} }}
-.block-container {{ padding-top: 100px !important; padding-bottom: 0rem; }}
-.material-symbols-outlined {{ line-height: 1 !important; }}
-</style>
-<div class="fixed-top-bar">
-    {logo_html}
-    <h1 style="margin: 0; font-size: 26px; padding: 0;">T/S 상용성 그래프 만들기</h1>
-</div>
-"""
+    /* 1. Streamlit 기본 상단 헤더, 메뉴, 푸터 숨기기 */
+    [data-testid="stHeader"], #MainMenu, footer {{
+        display: none !important;
+    }}
+    
+    /* 2. 🌟 새로운 상단 고정 메뉴바 디자인 🌟 */
+    .fixed-header {{
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 60px;
+        background-color: #ffffff;
+        box-shadow: 0px 2px 10px rgba(0,0,0,0.1);
+        z-index: 999998;
+        display: flex;
+        align-items: center;
+        padding-left: 20px;
+        border-bottom: 1px solid #eaeaea;
+    }}
+    .fixed-header img {{
+        width: 45px;
+        margin-right: 12px;
+    }}
+    .fixed-header h2 {{
+        margin: 0;
+        padding: 0;
+        font-size: 24px;
+        font-weight: 700;
+        color: #31333F;
+    }}
 
-st.markdown(custom_css_and_header, unsafe_allow_html=True)
+    /* 3. 본문 상단 여백 설정 (상단바에 가려지지 않도록) */
+    .block-container {{
+        padding-top: 80px !important; 
+        padding-bottom: 0rem !important;
+    }}
+    
+    /* 머티리얼 아이콘 정렬 */
+    .material-symbols-outlined {{
+        line-height: 1 !important;
+        vertical-align: middle;
+    }}
+</style>
+
+<!-- 상단 메뉴바 HTML 렌더링 -->
+<div class="fixed-header">
+    <img src="data:image/png;base64,{logo_base64}" onerror="this.style.display='none'">
+    <h2>T/S 상용성 그래프 만들기</h2>
+</div>
+""", unsafe_allow_html=True)
 
 # ==========================================
-# 3. 메인 화면 시작 (텍스트 및 구분선 제거됨)
+# 3. 메인 화면 시작 
 # ==========================================
 
 # 화면을 좌/우 두 개의 열로 나눔 (비율 1.1 : 1)
@@ -181,7 +210,7 @@ with col_right:
 
                 color_yellow = '#FFB300' 
                 color_red = '#E53935'    
-                color_blue = '#1E88E5'    
+                color_blue = '#1E88E5'   
                 colors = [color_yellow, color_red, color_blue]
 
                 plot_smooth_segment(ax, df1['X'].values, df1[df.columns[1]].values, color=color_yellow, label=label_1)
