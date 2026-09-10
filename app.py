@@ -142,7 +142,7 @@ with col_left:
     # 1. 폰트 크기 최적화 (상수를 600 -> 480으로 낮춰 표 밖으로 나가는 현상 방지)
     max_label_len = max(len(label_1), len(label_2), len(label_3))
     
-    calculated_font_size = int(440 / max_label_len)
+    calculated_font_size = int(460 / max_label_len)
     
     # 폰트 최대 크기를 18로 제한하여 너무 꽉 차는 것을 방지
     font_size = max(10, min(18, calculated_font_size))
