@@ -229,7 +229,7 @@ with col_right:
                 
                 leg = ax.legend(
                     loc='lower left',             
-                    bbox_to_anchor=(0.25, 0.03),  
+                    bbox_to_anchor=(0.22, 0.03),  
                     framealpha=0.9,               
                     edgecolor='#CCCCCC',
                     prop={'family': 'monospace', 'size': font_size},
