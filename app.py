@@ -139,18 +139,17 @@ with col_left:
     label_2 = align_label(dye_name_2, dye_amount_2, "Dye 2")
     label_3 = align_label(dye_name_3, dye_amount_3, "Dye 3")
 
+    # 1. 폰트 크기 최적화 (상수를 600 -> 480으로 낮춰 표 밖으로 나가는 현상 방지)
     max_label_len = max(len(label_1), len(label_2), len(label_3))
-
-    if max_label_len > 40:      
-        font_size = 14
-    elif max_label_len > 30:    
-        font_size = 16
-    elif max_label_len > 22:    
-        font_size = 18
-    else:                       
-        font_size = 22
+    
+    calculated_font_size = int(480 / max_label_len)
+    
+    # 폰트 최대 크기를 18로 제한하여 너무 꽉 차는 것을 방지
+    font_size = max(10, min(18, calculated_font_size))
 
     st.markdown("<h3 style='display: flex; align-items: center;'><span class='material-symbols-outlined' style='margin-right:8px;'>settings</span>데이터 입력</h3>", unsafe_allow_html=True)
+    
+    # ... (중략: 데이터프레임 처리 및 그래프 그리는 부분은 기존과 동일하게 유지) ...
 
     raw_data = None
     default_x_visible = [5.0, 10.0, 20.0, np.nan, 22.0, 25.0, 30.0, 40.0, 60.0, 80.0, 100.0]
@@ -229,10 +228,13 @@ with col_right:
                 ax.grid(True, linestyle='--', alpha=0.7)
                 
                 leg = ax.legend(
-                    loc='lower right', 
-                    framealpha=1.0, 
+                    loc='lower left',             
+                    bbox_to_anchor=(0.17, 0.03),  
+                    framealpha=0.9,               
                     edgecolor='#CCCCCC',
-                    prop={'family': 'monospace', 'size': font_size}
+                    prop={'family': 'monospace', 'size': font_size},
+                    borderpad=0.6,                
+                    labelspacing=0.4              
                 )
                 
                 for i, text in enumerate(leg.get_texts()):
