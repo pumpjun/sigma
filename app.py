@@ -247,9 +247,9 @@ with col_right:
                 ax.annotate(
                     'Alkali\nDosing', 
                     xy=(20, 120), 
-                    xytext=(20, 127),
-                    arrowprops=dict(arrowstyle="->", color='black', lw=2.0),
-                    fontsize=14, 
+                    xytext=(20, 122),  # 기존 127에서 122로 낮춰 제목과 거리를 둠
+                    arrowprops=dict(arrowstyle="->", color='black', lw=1.5), # 화살표 두께도 1.5로 살짝 얇게 조절
+                    fontsize=11,       # 기존 14에서 11로 글씨 크기 축소
                     fontweight='bold', 
                     color='black',
                     horizontalalignment='center', 
