@@ -1,0 +1,40 @@
+[server]
+# 저장소의 static 폴더(글꼴 파일)를 화면에서 쓸 수 있게
+enableStaticServing = true
+
+[theme]
+# 아래 # 기호 뒤에 알아오신 회사 로고 색상 코드를 넣어주세요!
+primaryColor = "#1b489d"
+# 표 · 입력칸 · 드롭다운 글자까지: 영어·숫자 Outfit → 한글 나눔스퀘어 네오
+font = "OY Outfit, OY NanumSquare Neo, sans-serif"
+
+[[theme.fontFaces]]
+family = "OY Outfit"
+url = "app/static/fonts/outfit-latin-wght-normal.woff2"
+weight = "100 900"
+unicodeRange = "U+0000-001F,U+0021-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD"
+
+[[theme.fontFaces]]
+family = "OY NanumSquare Neo"
+url = "app/static/fonts/NanumSquareNeoTTF-aLt.woff2"
+weight = "100 349"
+
+[[theme.fontFaces]]
+family = "OY NanumSquare Neo"
+url = "app/static/fonts/NanumSquareNeoTTF-bRg.woff2"
+weight = "350 549"
+
+[[theme.fontFaces]]
+family = "OY NanumSquare Neo"
+url = "app/static/fonts/NanumSquareNeoTTF-cBd.woff2"
+weight = "550 749"
+
+[[theme.fontFaces]]
+family = "OY NanumSquare Neo"
+url = "app/static/fonts/NanumSquareNeoTTF-dEb.woff2"
+weight = "750 849"
+
+[[theme.fontFaces]]
+family = "OY NanumSquare Neo"
+url = "app/static/fonts/NanumSquareNeoTTF-eHv.woff2"
+weight = "850 900"
