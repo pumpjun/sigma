@@ -1,0 +1,2 @@
+NanumSquareNeoTTF-*.woff2, NanumSquareNeo-*.ttf : 나눔스퀘어 네오 (Copyright NAVER Corporation) - SIL Open Font License 1.1
+outfit-latin-wght-normal.woff2, Outfit-*.ttf : Outfit (Copyright The Outfit Project Authors) - SIL Open Font License 1.1
